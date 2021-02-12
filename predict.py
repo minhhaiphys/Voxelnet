@@ -24,7 +24,7 @@ def main():
   parser.add_argument("--batch_size", default=2, help="Total batch_size", type=int)
 
   parser.add_argument("--dump_vis", default="no", help="Boolean to save the viz (images, heatmaps, birdviews) of the dump test (yes or no)", type=str2bool)
-  parser.add_argument("--data_root_dir", default="", help="Data root directory", type=str)
+  parser.add_argument("--data_root_dir", default="./DATA_DIR", help="Data root directory", type=str)
   parser.add_argument("--dataset_to_test", default="", help="Dataset to use for the predictions (validation or testing)", type=str)
   parser.add_argument("--model_dir", default="", help="Directory to save the models, the viz and the logs", type=str)
   parser.add_argument("--model_name", default="", help="Model Name", type=str)

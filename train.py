@@ -47,7 +47,7 @@ def main():
   parser.add_argument("--huber_delta", default=3.0, help="Huber loss epsilon", type=float)
 
   parser.add_argument("--dump_vis", default="no", help="Boolean to save the viz (images, heatmaps, birdviews) of the dump test (yes or no)", type=str2bool)
-  parser.add_argument("--data_root_dir", default="", help="Data root directory", type=str)
+  parser.add_argument("--data_root_dir", default="./DATA_DIR", help="Data root directory", type=str)
   parser.add_argument("--model_dir", default="", help="Directory to save the models, the viz and the logs", type=str)
   parser.add_argument("--model_name", default="", help="Model Name", type=str)
   parser.add_argument("--dump_test_interval", default=-1, help="Launch a dump test every n epochs", type=int)

@@ -6,6 +6,8 @@ from utils.utils import delta_to_boxes3d, corner_to_standup_box2d, center_to_cor
 from utils.utils import lidar_to_bird_view_img, draw_lidar_box3d_on_birdview, label_to_gt_box3d
 from utils.colorize import colorize
 
+data_format = "channels_first" # "channels_last" or "channels_first" depending on data shape
+
 class VFE_Layer(tf.keras.layers.Layer):
   """
     A VFE layer class
@@ -96,9 +98,9 @@ class ConvMiddleLayer(tf.keras.layers.Layer):
     super(ConvMiddleLayer, self).__init__()
     self.out_shape = out_shape
 
-    self.conv1 = tf.keras.layers.Conv3D(64, (3,3,3), (2,1,1), data_format="channels_first", padding="VALID")
-    self.conv2 = tf.keras.layers.Conv3D(64, (3,3,3), (1,1,1), data_format="channels_first", padding="VALID")
-    self.conv3 = tf.keras.layers.Conv3D(64, (3,3,3), (2,1,1), data_format="channels_first", padding="VALID")
+    self.conv1 = tf.keras.layers.Conv3D(64, (3,3,3), (2,1,1), data_format=data_format, padding="VALID")
+    self.conv2 = tf.keras.layers.Conv3D(64, (3,3,3), (1,1,1), data_format=data_format, padding="VALID")
+    self.conv3 = tf.keras.layers.Conv3D(64, (3,3,3), (2,1,1), data_format=data_format, padding="VALID")
 
     self.bn1 = tf.keras.layers.BatchNormalization(trainable=True)
     self.bn2 = tf.keras.layers.BatchNormalization(trainable=True)
@@ -169,14 +171,14 @@ class RPN(tf.keras.layers.Layer):
                                   kernel_size, 
                                   stride_size, 
                                   padding="SAME", 
-                                  data_format="channels_first")
+                                  data_format=data_format)
 
   def deconv_layer(self, out_channels, kernel_size, stride_size):
     return tf.keras.layers.Conv2DTranspose(out_channels, 
                                            kernel_size, 
                                            stride_size, 
                                            padding="SAME", 
-                                           data_format="channels_first")
+                                           data_format=data_format)
 
   def block_conv_op(self, block_id, input):
     i = 1

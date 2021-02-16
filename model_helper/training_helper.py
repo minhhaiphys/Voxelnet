@@ -41,7 +41,7 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
   def distributed_train_step():
 
     batch = next(train_batcher)  
-    per_replica_losses = strategy.experimental_run_v2(model.train_step,
+    per_replica_losses = strategy.run(model.train_step,
                                                       args=(batch["feature_buffer"], 
                                                             batch["coordinate_buffer"],
                                                             batch["targets"], 
@@ -56,7 +56,7 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
   @tf.function
   def distributed_validate_step():
     batch = next(rand_test_batcher)
-    per_replica_losses = strategy.experimental_run_v2(model.train_step,
+    per_replica_losses = strategy.run(model.train_step,
                                                     args=(batch["feature_buffer"], 
                                                           batch["coordinate_buffer"],
                                                           batch["targets"], 

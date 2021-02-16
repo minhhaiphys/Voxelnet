@@ -36,8 +36,8 @@ def main():
   parser = argparse.ArgumentParser()
   parser.add_argument("--strategy", default="all", help="Distributed or centralized training (options : all for all available gpus or string of gpus numbers separated by commas like '0,1')", type=str)
 
-  parser.add_argument("--batch_size", default=2, help="Total batch_size", type=int)
-  parser.add_argument("--n_epochs", default=160, help="Total Number of epochs to train the model", type=int)
+  parser.add_argument("--batch_size", default=1, help="Total batch_size", type=int)
+  parser.add_argument("--n_epochs", default=1, help="Total Number of epochs to train the model", type=int)
 
   parser.add_argument("--learning_rate", default=1e-3, help="Learning rate", type=float)
   parser.add_argument("--small_addon_for_BCE", default=1e-6, help="Small addon to add to the binary asymetric cross entropy for the loss", type=float)

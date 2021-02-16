@@ -10,7 +10,7 @@ def predict_step(model, batch, anchors, cfg, params, summary=False, vis=False):
 
   @tf.function
   def distributed_predict_step():
-    return model.strategy.experimental_run_v2(model._predict_step, args=(batch["feature_buffer"], batch["coordinate_buffer"]))
+    return model.strategy.run(model._predict_step, args=(batch["feature_buffer"], batch["coordinate_buffer"]))
 
   tag = batch["tag"].numpy().astype(str)
   if summary or vis:

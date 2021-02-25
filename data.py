@@ -227,6 +227,11 @@ class Data_helper:
       return batch
 
     dataset = dataset.map(update_dataset)
+    # Disable AutoShard, courtesy of: https://stackoverflow.com/questions/65322700/tensorflow-keras-consider-either-turning-off-auto-sharding-or-switching-the-a
+    options = tf.data.Options()
+    options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.OFF
+    dataset = dataset.with_options(options)
+    
     if mode in ["train", "sample_test"]:
       dataset = dataset.repeat()
     dataset = dataset.prefetch(buffer_size)

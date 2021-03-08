@@ -123,7 +123,10 @@ class ConvMiddleLayer(tf.keras.layers.Layer):
 
     out = tf.pad(out, [(0,0)]*2 + [(1,1)]*3)
     out = tf.nn.relu(self.bn3(self.conv3(out)))
-    return tf.reshape(out, self.out_shape)
+    # out = tf.keras.layers.Reshape(target_shape=self.out_shape[1:])(out)
+    out = tf.reshape(out, self.out_shape)
+    print("out_shape = ", out.shape)
+    return out
 
 
 
@@ -231,6 +234,7 @@ class Model(tf.keras.Model):
     super(Model, self).__init__()
     self.strategy = strategy
     n_replicas = self.strategy.num_replicas_in_sync
+    print("n_replicas = ", n_replicas)
     self.params = params
     self.cfg = cfg
     self.vfe_block = VFE_Block(cfg.VFE_OUT_DIMS, cfg.VFE_FINAl_OUT_DIM, cfg.GRID_SIZE )

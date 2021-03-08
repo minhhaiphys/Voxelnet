@@ -1,11 +1,12 @@
 import tensorflow as tf
 import argparse
-import os
+import os, time
 
 from model_helper.test_helper import predict
 from data import Data_helper
 from model import Model
 from config import cfg
+
 
 def str2bool(v):
   if isinstance(v, bool):
@@ -21,13 +22,13 @@ def main():
   parser = argparse.ArgumentParser()
   parser.add_argument("--strategy", default="all", help="Distributed or centralized training (options : all for all available gpus or string of gpus numbers separated by commas like '0,1')", type=str)
 
-  parser.add_argument("--batch_size", default=2, help="Total batch_size", type=int)
+  parser.add_argument("--batch_size", default=1, help="Total batch_size", type=int)
 
   parser.add_argument("--dump_vis", default="no", help="Boolean to save the viz (images, heatmaps, birdviews) of the dump test (yes or no)", type=str2bool)
   parser.add_argument("--data_root_dir", default="./DATA_DIR", help="Data root directory", type=str)
-  parser.add_argument("--dataset_to_test", default="", help="Dataset to use for the predictions (validation or testing)", type=str)
-  parser.add_argument("--model_dir", default="", help="Directory to save the models, the viz and the logs", type=str)
-  parser.add_argument("--model_name", default="", help="Model Name", type=str)
+  parser.add_argument("--dataset_to_test", default="validation", help="Dataset to use for the predictions (validation or testing)", type=str)
+  parser.add_argument("--model_dir", default="model", help="Directory to save the models, the viz and the logs", type=str)
+  parser.add_argument("--model_name", default="model", help="Model Name", type=str)
   parser.add_argument("--ckpt_name", default="", help="Checkpoint to evaluate name, if empty uses the latest checkpoint", type=str) 
 
   args = parser.parse_args()
@@ -93,4 +94,7 @@ def main():
   predict(strategy, model, test_batcher,  params, cfg)
 
 if __name__ =="__main__":
+  t1 = time.time()
   main()
+  t2 = time.time()
+  print("Total time: %.2f hours" %((t2-t1)/3600.0))

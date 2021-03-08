@@ -1,5 +1,28 @@
+import tensorflow as tf
+import os
 from easydict import EasyDict as edict
 
+os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
+
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+  try:
+    for gpu in gpus:
+#         tf.config.experimental.set_memory_growth(gpu, True)
+        pass
+    """
+    # Create 2 virtual GPUs with 2GB memory each
+    tf.config.experimental.set_virtual_device_configuration(
+        gpus[0],
+        [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=3*1024),
+         tf.config.experimental.VirtualDeviceConfiguration(memory_limit=3*1024)])
+    """
+    logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+    print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+  except RuntimeError as e:
+    # Virtual devices must be set before GPUs have been initialized
+    print(e)
+    
 __cfg__ = edict()
 
 # for dataset dir
@@ -19,9 +42,9 @@ if __cfg__.DETECT_OBJECT == 'Car':
     __cfg__.Y_MAX = 40
     __cfg__.X_MIN = 0
     __cfg__.X_MAX = 70.4
-    __cfg__.VOXEL_X_SIZE = 0.2
-    __cfg__.VOXEL_Y_SIZE = 0.2
-    __cfg__.VOXEL_Z_SIZE = 0.4
+    __cfg__.VOXEL_X_SIZE = 0.4 #0.2
+    __cfg__.VOXEL_Y_SIZE = 0.4 #0.2
+    __cfg__.VOXEL_Z_SIZE = 0.8# 0.4
     __cfg__.VOXEL_POINT_COUNT = 35
     __cfg__.INPUT_WIDTH = int((__cfg__.X_MAX - __cfg__.X_MIN) / __cfg__.VOXEL_X_SIZE)
     __cfg__.INPUT_HEIGHT = int((__cfg__.Y_MAX - __cfg__.Y_MIN) / __cfg__.VOXEL_Y_SIZE)

@@ -1,29 +1,11 @@
 import tensorflow as tf
 import argparse
-import os
+import os, time
 
 from model_helper.training_helper import train_epochs
 from data import Data_helper
 from model import Model
 from config import cfg
-
-gpus = tf.config.experimental.list_physical_devices('GPU')
-if gpus:
-  try:
-    for gpu in gpus:
-        tf.config.experimental.set_memory_growth(gpu, True)
-    """
-    # Create 2 virtual GPUs with 1GB memory each
-    tf.config.experimental.set_virtual_device_configuration(
-        gpus[0],
-        [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024),
-         tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024)])
-    """
-    logical_gpus = tf.config.experimental.list_logical_devices('GPU')
-    print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
-  except RuntimeError as e:
-    # Virtual devices must be set before GPUs have been initialized
-    print(e)
 
 
 def str2bool(v):
@@ -52,8 +34,8 @@ def main():
 
   parser.add_argument("--dump_vis", default="no", help="Boolean to save the viz (images, heatmaps, birdviews) of the dump test (yes or no)", type=str2bool)
   parser.add_argument("--data_root_dir", default="./DATA_DIR", help="Data root directory", type=str)
-  parser.add_argument("--model_dir", default="", help="Directory to save the models, the viz and the logs", type=str)
-  parser.add_argument("--model_name", default="", help="Model Name", type=str)
+  parser.add_argument("--model_dir", default="model", help="Directory to save the models, the viz and the logs", type=str)
+  parser.add_argument("--model_name", default="model", help="Model Name", type=str)
   parser.add_argument("--dump_test_interval", default=-1, help="Launch a dump test every n epochs", type=int)
   parser.add_argument("--summary_interval",default=-1, help="Save the training summary every n steps", type=int)
   parser.add_argument("--summary_val_interval", default=-1, help="Run an evaluation of the model and save the summary  every n steps and", type=int)
@@ -124,4 +106,7 @@ def main():
     train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params, cfg, ckpt, ckpt_manager, strategy)
 
 if __name__ =="__main__":
+  t1 = time.time()
   main()
+  t2 = time.time()
+  print("Total time: %.2f hours" %((t2-t1)/3600.0))

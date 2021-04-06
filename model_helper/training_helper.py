@@ -1,4 +1,4 @@
-import time
+import time, sys
 from utils.utils import box3d_to_label
 import numpy as np
 import tensorflow as tf
@@ -36,19 +36,19 @@ def epoch_counter(current_step, num_batches):
 
 def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params, cfg,
                  ckpt, ckpt_manager, strategy):
-  
+
   @tf.function
   def distributed_train_step():
 
-    batch = next(train_batcher)  
+    batch = next(train_batcher)
     per_replica_losses = strategy.run(model.train_step,
-                                                      args=(batch["feature_buffer"], 
+                                                      args=(batch["feature_buffer"],
                                                             batch["coordinate_buffer"],
-                                                            batch["targets"], 
-                                                            batch["pos_equal_one"], 
+                                                            batch["targets"],
+                                                            batch["pos_equal_one"],
                                                             batch["pos_equal_one_reg"],
                                                             batch["pos_equal_one_sum"],
-                                                            batch["neg_equal_one"], 
+                                                            batch["neg_equal_one"],
                                                             batch["neg_equal_one_sum"]))
     return [strategy.reduce(tf.distribute.ReduceOp.SUM, per_replica_loss,
                           axis=None) for per_replica_loss in per_replica_losses]
@@ -57,13 +57,13 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
   def distributed_validate_step():
     batch = next(rand_test_batcher)
     per_replica_losses = strategy.run(model.train_step,
-                                                    args=(batch["feature_buffer"], 
+                                                    args=(batch["feature_buffer"],
                                                           batch["coordinate_buffer"],
-                                                          batch["targets"], 
-                                                          batch["pos_equal_one"], 
+                                                          batch["targets"],
+                                                          batch["pos_equal_one"],
                                                           batch["pos_equal_one_reg"],
                                                           batch["pos_equal_one_sum"],
-                                                          batch["neg_equal_one"], 
+                                                          batch["neg_equal_one"],
                                                           batch["neg_equal_one_sum"]))
     return [strategy.reduce(tf.distribute.ReduceOp.SUM, per_replica_loss,
                           axis=None) for per_replica_loss in per_replica_losses], batch
@@ -71,9 +71,9 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
   dump_vis = params["dump_vis"] # bool
   kitti_eval_script = cfg.KITTY_EVAL_SCRIPT
 
-  sum_logdir = os.path.join(params["model_dir"], params["model_name"], "train_log/summary_logdir") 
+  sum_logdir = os.path.join(params["model_dir"], params["model_name"], "train_log/summary_logdir")
   logdir = os.path.join(params["model_dir"], params["model_name"], "train_log/logdir")
-  dump_test_logdir = os.path.join(params["model_dir"], params["model_name"], "train_log/dump_test_logdir") 
+  dump_test_logdir = os.path.join(params["model_dir"], params["model_name"], "train_log/dump_test_logdir")
 
   os.makedirs(sum_logdir, exist_ok=True)
   os.makedirs(logdir, exist_ok=True)
@@ -89,7 +89,7 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
 
   epoch = ckpt.epoch
   epoch.assign(epoch_counter(ckpt.step.numpy(), train_batcher.num_examples))
-  
+
   try:
     while epoch.numpy() <= params["n_epochs"]:
       num_batches = train_batcher.num_examples//params["batch_size"]+(1 if train_batcher.num_examples%params["batch_size"]==1 else 0)
@@ -98,7 +98,7 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
         epoch.assign(epoch_counter(ckpt.step.numpy(), num_batches))
         if epoch.numpy() > params["n_epochs"]:
           break
-        
+
         global_step = ckpt.step.numpy()
         tf.summary.experimental.set_step(global_step)
 
@@ -109,7 +109,7 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
         print('train: {} @ epoch:{}/{} global_step:{} loss: {} reg_loss: {} cls_loss: {} cls_pos_loss: {} cls_neg_loss: {} batch time: {:.4f}'.format(step+1, epoch.numpy(), params["n_epochs"], ckpt.step.numpy(), colored('{:.4f}'.format(losses[0]), "red"), colored('{:.4f}'.format(losses[1]), "magenta"), colored('{:.4f}'.format(losses[2]), "yellow"), colored('{:.4f}'.format(losses[3]), "blue"), colored('{:.4f}'.format(losses[4]), "cyan"),  t1))
         with open('{}/train.txt'.format(logdir), 'a') as f:
           f.write( 'train: {} @ epoch:{}/{} global_step:{} loss: {:.4f} reg_loss: {:.4f} cls_loss: {:.4f} cls_pos_loss: {:.4f} cls_neg_loss: {:.4f} batch time: {:.4f} \n'.format(step+1, epoch.numpy(), params["n_epochs"], ckpt.step.numpy(), losses[0], losses[1], losses[2], losses[3], losses[4], t1) )
-                        
+
         if (step+1) % summary_interval == 0:
           train_summary(summary_writer, list(losses)+[model.trainable_variables])
 
@@ -122,11 +122,12 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
             ret = predict_step( model, batch, train_batcher.anchors, cfg, params, summary=True)
             pred_summary(summary_writer, ret)
           except:
-            print("prediction skipped due to error")
+            e = sys.exc_info()[0]
+            print("prediction skipped due to error: ", e)
 
         if (step+1) % summary_flush_interval==0:
           summary_writer.flush()
-        
+
         if global_step%train_batcher.num_examples==0:
           ckpt_manager.save(checkpoint_number=ckpt.step.numpy())
           print("Saved checkpoint for step {}".format(ckpt.step.numpy()))
@@ -135,7 +136,7 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
         ckpt.step.assign_add(1)
 
       # dump test data every 10 epochs
-      
+
       if ( epoch.numpy()  ) % dump_interval == 0 :
         print("dump_test")
         # create output folder
@@ -143,7 +144,7 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
         os.makedirs(os.path.join(dump_test_logdir, str(epoch.numpy()), 'data'), exist_ok=True)
         if dump_vis:
           os.makedirs(os.path.join(dump_test_logdir, str(epoch.numpy()), 'vis'), exist_ok=True)
-                      
+
         for eval_step, batch in enumerate(val_batcher.batcher):
           if dump_vis:
             res = predict_step(model, batch,  train_batcher.anchors, cfg, params, summary=False, vis=True)
@@ -167,15 +168,15 @@ def train_epochs( model, train_batcher, rand_test_batcher, val_batcher,  params,
               cv2.imwrite( front_img_path, front_image )
               cv2.imwrite( bird_view_path, bird_view )
               cv2.imwrite( heatmap_path, heatmap )
-          
-        
+
+
         # execute evaluation code
         #cmd_1 = "./"+kitti_eval_script
         #cmd_2 = os.path.join(cfg.DATA_DIR, "validation", "label_2")
         #cmd_3 = os.path.join( dump_test_logdir, str(epoch.numpy()) )
         #cmd_4 = os.path.join( dump_test_logdir, str(epoch.numpy()), 'log' )
         #os.system( " ".join( [cmd_1, cmd_2, cmd_3, cmd_4] ) ).read()
-        
+
   except KeyboardInterrupt:
     ckpt_manager.save(checkpoint_number=ckpt.step.numpy())
     print("Saved checkpoint for step {}".format(ckpt.step.numpy()))

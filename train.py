@@ -36,10 +36,10 @@ def main():
   parser.add_argument("--data_root_dir", default="./DATA_DIR", help="Data root directory", type=str)
   parser.add_argument("--model_dir", default="model", help="Directory to save the models, the viz and the logs", type=str)
   parser.add_argument("--model_name", default="model", help="Model Name", type=str)
-  parser.add_argument("--dump_test_interval", default=-1, help="Launch a dump test every n epochs", type=int)
-  parser.add_argument("--summary_interval",default=-1, help="Save the training summary every n steps", type=int)
-  parser.add_argument("--summary_val_interval", default=-1, help="Run an evaluation of the model and save the summary  every n steps and", type=int)
-  parser.add_argument("--summary_flush_interval", default=-1, help="Flush the summaries every n steps", type=int)
+  parser.add_argument("--dump_test_interval", default=10, help="Launch a dump test every n epochs", type=int)
+  parser.add_argument("--summary_interval",default=5, help="Save the training summary every n steps", type=int)
+  parser.add_argument("--summary_val_interval", default=10, help="Run an evaluation of the model and save the summary  every n steps and", type=int)
+  parser.add_argument("--summary_flush_interval", default=10, help="Flush the summaries every n steps", type=int)
   parser.add_argument("--ckpt_max_keep", default=11, help="Max checkpoints to keep", type=int) 
 
 
@@ -109,4 +109,4 @@ if __name__ =="__main__":
   t1 = time.time()
   main()
   t2 = time.time()
-  print("Total time: %.2f hours" %((t2-t1)/3600.0))
+  print("Finished. Total time: %.2f hours" %((t2-t1)/3600.0))

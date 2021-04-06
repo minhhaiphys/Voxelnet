@@ -25,7 +25,8 @@ class Data_helper:
     self.cfg = cfg
     self.params = params
     self.mode = mode
-    data_d = "training" if mode == "train" else "testing" if mode =="test" else "validation"
+    # data_d = "training" if mode == "train" else "testing" if mode =="test" else "validation"
+    data_d = "training" if mode == "train" else "training" if mode =="sample_test" else "validation"
     if mode != "test":
       label_tags = [os.path.basename(a).split(".")[0] for a in glob.glob(os.path.join(cfg.DATA_DIR, data_d, "label_2/*.txt"))]
     img_tags = [os.path.basename(a).split(".")[0] for a in glob.glob(os.path.join(cfg.DATA_DIR, data_d, "image_2/*.png"))]
@@ -63,7 +64,8 @@ class Data_helper:
 
 
   def fill_examples_queue(self, cfg, mode, is_aug_data=False):
-    data_d = "training" if mode == "train" else "testing" if mode =="test" else "validation"
+    # data_d = "training" if mode == "train" else "testing" if mode =="test" else "validation"
+    data_d = "training" if mode == "train" else "training" if mode =="sample_test" else "validation"
     img_dir = "{}/{}/image_2".format(cfg.DATA_DIR, data_d)
     labels_dir = "{}/{}/label_2".format(cfg.DATA_DIR, data_d)
     pc_dir = "{}/{}/velodyne".format(cfg.DATA_DIR, data_d)

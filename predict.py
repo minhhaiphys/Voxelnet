@@ -97,4 +97,4 @@ if __name__ =="__main__":
   t1 = time.time()
   main()
   t2 = time.time()
-  print("Total time: %.2f hours" %((t2-t1)/3600.0))
+  print("Finished. Total time: %.2f hours" %((t2-t1)/3600.0))
